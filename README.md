@@ -2,6 +2,7 @@
 
 
 <h2>Description</h2>
+
 In this lab we'll be using Splunk to investigate a website that has been defaced. We'll be looking at what and how to search for IOCs.
 
 
@@ -26,7 +27,7 @@ index=botsv1 imreallynotbatman.com sourcetype=stream:http
 
 <img src= "https://i.imgur.com/IlskdNk.png">
 
-This results in over 22k events of which 17k are from 1 IP address `40.80.148.42`, so let's focus ours search on it to see if we can find anything more suspicious. Fields such as `URI_path` and `POST Requests` can reveal vital information in cases like this:
+This results in over 22k events of which 17k are from 1 IP address `40.80.148.42`, so let's focus our search on it to see if we can find anything more suspicious. Fields such as `URI_path` and `POST Requests` can reveal vital information in cases like this:
 
 ```
 index=botsv1 imreallynotbatman.com sourcetype="stream:http" src_ip="40.80.148.42"
@@ -48,7 +49,7 @@ Sure enough, multiple alerts have been triggered. Upon inspecting them, it appea
 <h1> </h1>
 
 ### Exploitation
-Now that we've confirmed the attacker was scanning the website, let's take a look at how they tried to exploit it. The `URL` field contains multiple entries regarding Joomla CMS admin signin page.
+Now that we've confirmed the attacker was scanning the website, let's take a look at how they tried to exploit it. The `URL` field contains multiple entries regarding Joomla's CMS admin signin page.
 <br>
 
 <img src= "https://i.imgur.com/aNcdj9r.png">
@@ -59,13 +60,38 @@ index=botsv1 imreallynotbatman.com sourcetype=stream:http http_method=POST uri="
 ```
 <img src= "https://i.imgur.com/s2EGRqA.png">
 
-As we can see, the attacker has used the other IP address found in our first search query to make multiple attempts at logging in with the username `admin`. Additionally, the time stamps reveal the attacker was using an automated tool to brute force their way in.
+As we can see, the attacker has used the other IP address found in our first search query to make multiple attempts at logging in with the username `admin`. Additionally, the timestamps reveal the attacker was using an automated tool to brute force their way in.
+<br>
+
+
+#### Using Regex to Extract Passwords and Usernames
+Splunk has a function called `Rex` that can do regular experession. If you type it in the search bar it'll show you some suggestions on how you can use it. In our case we want to extract the credentials:
+```
+index=botsv1 sourcetype=stream:http dest_ip="192.168.250.70" http_method=POST form_data=*username*passwd* | rex field=form_data "passwd=(?<creds>\w+)"  | table _time src_ip uri creds
+```
+<img src= "https://i.imgur.com/KMwvX11.png">
+
+Next let's try to find out what tools the attacker used to start this communication. Simply adding  `http_user_agent` to the query should accomplish this:
+```
+index=botsv1 sourcetype=stream:http dest_ip="192.168.250.70" http_method=POST form_data=*username*passwd* | rex field=form_data "passwd=(?<creds>\w+)"  | table _time src_ip uri creds http_user_agent
+```
+<img src= "https://i.imgur.com/lipaEWU.png">
+
+It appears the attacker brute-forced the credentials with Python and once they found the correct password, proceeded to login noramlly through the Mozzila browser.
 
 
 <h1> </h1>
 
 
-Weaponization
+### Weaponization
+
+
+
+
+
+<h1> </h1>
+
+
 Delivery
 Installation
 Command & Control
