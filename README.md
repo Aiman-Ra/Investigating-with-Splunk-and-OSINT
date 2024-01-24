@@ -138,13 +138,23 @@ index=botsv1 url="/poisonivy-is-coming-for-you-batman.jpeg" dest_ip="192.168.250
 <br>
 
 
+<h1> </h1>
+
+### Command & Control
+The attacker uploaded a file from their host into the victim's server before defacing it, we can use that to figure out their FQDN. Fortigate's logs will make this easier for us:
+```
+index=botsv1 sourcetype=fortigate_utm"poisonivy-is-coming-for-you-batman.jpeg
+```
+
+
+
 
 
 <h1> </h1>
 
 Delivery
 Weaponization
-Command & Control
+
 
 
 
