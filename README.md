@@ -27,12 +27,12 @@ index=botsv1 imreallynotbatman.com sourcetype=stream:http
 
 <img src= "https://i.imgur.com/IlskdNk.png">
 
-This results in over 22k events of which 17k are from 1 IP address `40.80.148.42`, so let's focus our search on it to see if we can find anything more suspicious. Fields such as `URI_path` and `POST Requests` can reveal vital information in cases like this:
+This results in over 22k events of which 17k are from 1 IP address `40.80.148.42`, so let's focus our search on it to see if we can find anything more suspicious. Fields such as `URI` and `POST Requests` can reveal vital information in cases like this:
 
 ```
 index=botsv1 imreallynotbatman.com sourcetype="stream:http" src_ip="40.80.148.42"
 ```
-<img src= "https://i.imgur.com/vOusn4M.png">
+<img src= "https://i.imgur.com/HKZhlHM.png">
 
 Immediatley we can see a couple of red flags such as `/windows/win.ini` which is commonly used in directory traversal tactics. Thankfully, our client has Suricata installed, so we can view its logs to see if any alert was triggered and validate our suspicions:
 
@@ -49,7 +49,7 @@ Sure enough, multiple alerts have been triggered. Upon inspecting them, it appea
 <h1> </h1>
 
 ### Exploitation
-Now that we've confirmed the attacker was scanning the website, let's take a look at how they tried to exploit it. The `URL` field contains multiple entries regarding Joomla's CMS admin signin page.
+Now that we've confirmed the attacker was scanning the website, let's take a look at how they tried to exploit it. The `URL` field contains multiple entries regarding Joomla's CMS admin signin page:
 <br>
 
 <img src= "https://i.imgur.com/aNcdj9r.png">
@@ -67,35 +67,85 @@ As we can see, the attacker has used the other IP address found in our first sea
 #### Using Regex to Extract Passwords and Usernames
 Splunk has a function called `Rex` that can do regular experession. If you type it in the search bar it'll show you some suggestions on how you can use it. In our case we want to extract the credentials:
 ```
-index=botsv1 sourcetype=stream:http dest_ip="192.168.250.70" http_method=POST form_data=*username*passwd* | rex field=form_data "passwd=(?<creds>\w+)"  | table _time src_ip uri creds
+index=botsv1 imreallynotbatman.com sourcetype=stream:http http_method=POST form_data=*username*passwd* | rex field=form_data "passwd=(?<creds>\w+)"  | table _time src_ip uri creds
 ```
 <img src= "https://i.imgur.com/KMwvX11.png">
 
 Next let's try to find out what tools the attacker used to start this communication. Simply adding  `http_user_agent` to the query should accomplish this:
 ```
-index=botsv1 sourcetype=stream:http dest_ip="192.168.250.70" http_method=POST form_data=*username*passwd* | rex field=form_data "passwd=(?<creds>\w+)"  | table _time src_ip uri creds http_user_agent
+index=botsv1 imreallynotbatman.com sourcetype=stream:http http_method=POST form_data=*username*passwd* | rex field=form_data "passwd=(?<creds>\w+)"  | table _time src_ip uri creds http_user_agent
 ```
 <img src= "https://i.imgur.com/lipaEWU.png">
 
-It appears the attacker brute-forced the credentials with Python and once they found the correct password, proceeded to login noramlly through the Mozzila browser.
+It appears the attacker brute-forced the credentials with Python and once they found the correct password, proceeded to login normally through the Mozzila browser.
 
 
 <h1> </h1>
 
 
-### Weaponization
+### Installation
+When an attacker exploits a system they usually try to install a backdoor for presistence. In this phase we'll look for any malicious applications that might've been installed on the compromised server:
+```
+index=botsv1 dest_ip="192.168.250.70" sourcetype=stream:http *.exe
+```
+<img src= "https://i.imgur.com/4zPNNsM.png">
+<br>
 
+Looking at the interesting fields on the left, there's a new one called `part_filename{}` that contains 2 entries `3791.exe` and `agent.php`. If we dig further into them we can see that they've been uploaded from the same IP address the attacker used:
+<br>
+
+<img src= "https://i.imgur.com/CyphOV6.png">
+<br>
+
+Next we must know if this file was executed on the server. We can utlize Sysmon and look up `Eventcode=1` which stands for process creation:
+```
+index=botsv1 "3791.exe" EventCode=1
+```
+<img src= "https://i.imgur.com/n9H7M3I.png">
+<br>
+
+Sysmon also captures a file's hash value. We can utlize OSINT such as VirusTotal to see if the file is indeed malicous and what it does:
+<br>
+
+<img src= "https://i.imgur.com/7SkijNq.png">
+<br>
 
 
 
 
 <h1> </h1>
 
+### Actions on Objectives
+Now that we know the file has been executed on the compromised server, it's time to figure out the attacker's objective. One way to do this, is to look at the outgoing traffic from the server, because usally it's the client/browser that initiate communication with a webserver:
+```
+index=botsv1 src=192.168.250.70 sourcetype=suricata
+```
+<img src= "https://i.imgur.com/u5MRJoj.png">
+<br>
+
+The same IP addresses show up again with a large amount of traffic going to them. Let's focus on 1 of those IP addresses to see what's included in that traffic:
+```
+index=botsv1 src=192.168.250.70 dest_ip=23.22.63.114 sourcetype=suricata 
+```
+<img src= "https://i.imgur.com/6Ll3pcd.png">
+<br>
+
+This results in 3 files in `url` field. The jpg 1 looks interesting so let's create a table to see where it originated from:
+```
+index=botsv1 url="/poisonivy-is-coming-for-you-batman.jpeg" dest_ip="192.168.250.70" | table _time src dest_ip http.hostname url
+```
+<img src= "https://i.imgur.com/Y9fBB7Z.png">
+<br>
+
+
+
+
+<h1> </h1>
 
 Delivery
-Installation
+Weaponization
 Command & Control
-Actions on Objectives
+
 
 
 
