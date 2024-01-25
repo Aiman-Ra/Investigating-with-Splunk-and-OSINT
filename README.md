@@ -1,4 +1,4 @@
-![image](https://github.com/Aiman-Ra/Investigating-with-Splunk/assets/142124697/ac5b2d10-96a5-4a9c-a868-f11a53bef3d6)<h1>Investigating With Splunk</h1>
+<h1>Investigating With Splunk</h1>
 
 
 <h2>Description</h2>
@@ -140,12 +140,14 @@ index=botsv1 url="/poisonivy-is-coming-for-you-batman.jpeg" dest_ip="192.168.250
 ### Delivery
 A deteremined attacker may even have multiple attack vectors in case the first 1 fails. Looking up the IP address `23.22.63.114` on Threatminer results in the detection of multiple malwares:
 <br>
+
 <img src= "https://i.imgur.com/uk54jc5.png">
 <br>
 
 Clicking on the hash we find another .exe file utlizied by the hacker:
 <br>
-<img src= "https://i.imgur.com/diYypNR.png">
+
+<img src= "https://i.imgur.com/n7pLfEN.png">
 <br>
 
 <h1> </h1>
@@ -164,6 +166,7 @@ index=botsv1 sourcetype=fortigate_utm "poisonivy-is-coming-for-you-batman.jpeg"
 ### Weaponization
 Now that we've found their C2 server we can use OSINT once more to get more information on their IP address. Looking up `23.22.63.114` on Virustotal reveals the following:
 <br>
+
 <img src= "https://i.imgur.com/O6BFiJA.png">
 <br>
 
