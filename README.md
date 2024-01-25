@@ -1,4 +1,4 @@
-<h1>Investigating With Splunk</h1>
+![image](https://github.com/Aiman-Ra/Investigating-with-Splunk/assets/142124697/ac5b2d10-96a5-4a9c-a868-f11a53bef3d6)<h1>Investigating With Splunk</h1>
 
 
 <h2>Description</h2>
@@ -46,6 +46,7 @@ Sure enough, multiple alerts have been triggered. Upon inspecting them, it appea
 
 <img src= "https://i.ibb.co/1f9MdnK/cve.png">
 
+
 <h1> </h1>
 
 ### Exploitation
@@ -82,7 +83,6 @@ It appears the attacker brute-forced the credentials with Python and once they f
 
 <h1> </h1>
 
-
 ### Installation
 When an attacker exploits a system they usually try to install a backdoor for presistence. In this phase we'll look for any malicious applications that might've been installed on the compromised server:
 ```
@@ -108,9 +108,6 @@ Sysmon also captures a file's hash value. We can utlize OSINT such as VirusTotal
 <br>
 
 <img src= "https://i.imgur.com/7SkijNq.png">
-<br>
-
-
 
 
 <h1> </h1>
@@ -140,22 +137,36 @@ index=botsv1 url="/poisonivy-is-coming-for-you-batman.jpeg" dest_ip="192.168.250
 
 <h1> </h1>
 
+### Delivery
+A deteremined attacker may even have multiple attack vectors in case the first 1 fails. Looking up the IP address `23.22.63.114` on Threatminer results in the detection of multiple malwares:
+<br>
+<img src= "https://i.imgur.com/uk54jc5.png">
+<br>
+
+Clicking on the hash we find another .exe file utlizied by the hacker:
+<br>
+<img src= "https://i.imgur.com/diYypNR.png">
+<br>
+
+<h1> </h1>
+
 ### Command & Control
-The attacker uploaded a file from their host into the victim's server before defacing it, we can use that to figure out their FQDN. Fortigate's logs will make this easier for us:
+The attacker uploaded a file from their host into the victim's server before defacing it, we can use that to figure out their FQDN which might be their C2 server. Fortigate's firewall logs will make this easier for us:
 ```
-index=botsv1 sourcetype=fortigate_utm"poisonivy-is-coming-for-you-batman.jpeg
+index=botsv1 sourcetype=fortigate_utm "poisonivy-is-coming-for-you-batman.jpeg"
 ```
-
-
-
+<img src= "https://i.imgur.com/wil2eG8.png">
+<br>
 
 
 <h1> </h1>
 
-Delivery
-Weaponization
+### Weaponization
+Now that we've found their C2 server we can use OSINT once more to get more information on their IP address. Looking up `23.22.63.114` on Virustotal reveals the following:
+<br>
+<img src= "https://i.imgur.com/O6BFiJA.png">
+<br>
 
-
-
-
-
+One of the domains assosicated with that IP has the same name we found in the jpeg earlier `www.po1s0n1vy.com`. Using AlienVault, we can even get the name and email of the domain's owner:
+<br>
+<img src= "https://i.imgur.com/FbhpjvT.png">
