@@ -134,7 +134,6 @@ index=botsv1 url="/poisonivy-is-coming-for-you-batman.jpeg" dest_ip="192.168.250
 <img src= "https://i.imgur.com/Y9fBB7Z.png">
 <br>
 
-
 <h1> </h1>
 
 ### Delivery
@@ -172,4 +171,5 @@ Now that we've found their C2 server, we can use OSINT once more to get more inf
 
 One of the domains associated with that IP has the same name we found in the jpeg earlier: `www.po1s0n1vy.com`. Using AlienVault, we can even get the name and email of the domain's owner:
 <br>
+
 <img src= "https://i.imgur.com/FbhpjvT.png">
