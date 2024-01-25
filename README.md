@@ -59,7 +59,7 @@ To further validate our suspicions let's create a table of the POST requests sen
 ```
 index=botsv1 imreallynotbatman.com sourcetype=stream:http http_method=POST uri="/joomla/administrator/index.php" | table _time uri src_ip dest_ip form_data
 ```
-<img src= "https://i.imgur.com/s2EGRqA.png">
+<img src= "https://i.imgur.com/e8Gx47n.png">
 
 As we can see, the attacker has used the other IP address found in our first search query to make multiple attempts at logging in with the username `admin`. Additionally, the timestamps reveal the attacker was using an automated tool to brute force their way in.
 <br>
@@ -70,7 +70,7 @@ Splunk has a function called `Rex` that can do regular experession. If you type 
 ```
 index=botsv1 imreallynotbatman.com sourcetype=stream:http http_method=POST form_data=*username*passwd* | rex field=form_data "passwd=(?<creds>\w+)"  | table _time src_ip uri creds
 ```
-<img src= "https://i.imgur.com/KMwvX11.png">
+<img src= "https://i.imgur.com/y0ikAK1.png">
 
 Next let's try to find out what tools the attacker used to start this communication. Simply adding  `http_user_agent` to the query should accomplish this:
 ```
