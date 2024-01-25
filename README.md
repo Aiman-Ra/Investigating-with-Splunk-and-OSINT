@@ -127,7 +127,7 @@ index=botsv1 src=192.168.250.70 dest_ip=23.22.63.114 sourcetype=suricata
 <img src= "https://i.imgur.com/6Ll3pcd.png">
 <br>
 
-This results in three files in the `url` field. The jpg 1 looks interesting, so let's create a table to see where it originated from:
+This results in three files in the `url` field. The jpeg one looks interesting, so let's create a table to see where it originated from:
 ```
 index=botsv1 url="/poisonivy-is-coming-for-you-batman.jpeg" dest_ip="192.168.250.70" | table _time src dest_ip http.hostname url
 ```
